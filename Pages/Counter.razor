@@ -1,0 +1,44 @@
+@page "/counter"
+
+<h1>@Title</h1>
+
+<div class="simple-list-list">
+    @if (!Children.Any())
+    {
+        <p>You have no items in your COUNTER LIST</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var item in Children)
+            {
+                @item
+            }
+        </ul>
+    }
+</div>
+
+<p>Current count: @currentCount</p>
+
+<button class="btn btn-primary" onclick="@IncrementCount">Click me</button>
+
+@functions {
+
+    protected override void OnInit()
+    {
+        Children = new List<RenderFragment>();
+    }
+
+    [Parameter]
+    private string Title { get; set; } = "Counter";
+
+    [Parameter]
+    private List<RenderFragment> Children { get; set; }
+
+    int currentCount = 0;
+
+    void IncrementCount()
+    {
+        currentCount++;
+    }
+}

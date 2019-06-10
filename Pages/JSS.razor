@@ -1,0 +1,111 @@
+@page "/jss"
+
+<h1>This is the JSS Fallback Page</h1>
+<button onclick="@addCompoment">Add</button>
+
+<input type="text" bind="TxtExample" name="inpAdd"/>
+  <button onclick="@addCompoment">add comp1</button>
+<div class="simple-list-list">
+    @if (!componentListTest.Any())
+    {
+        <p>You have no items in your list</p>
+    }
+    else
+    {
+        <ul>
+            @foreach (var item in componentListTest)
+            {
+                @item
+            }
+        </ul>
+    }
+</div>
+
+
+@CreateDynamicComponent()
+
+@functions {
+
+    protected override void OnInit()
+    {
+        currentCount = 0;
+        Children = new List<RenderFragment>();
+        componentListTest = new List<RenderFragment>();
+    }
+
+    [Parameter]
+    private List<RenderFragment> Children { get; set; }
+
+    private List<RenderFragment> componentListTest { get; set; }
+
+    [Parameter]
+    private string Title { get; set; }
+    private string TxtExample { get; set; }
+    private int currentCount {get; set;}
+    private RenderFragment myref;
+
+    RenderFragment CreateDynamicComponent() => builder =>
+    {
+        // dynamically create a component
+        var componentType = Type.GetType("jssblazor.Pages.Counter");
+       
+        builder.OpenComponent(0, componentType);
+        builder.AddAttribute(1, "Title", "Injected dynamically by the JSS component");
+        builder.CloseComponent();
+
+        builder.OpenComponent(0, componentType);
+        builder.AddAttribute(1, "Title", "Second one");
+
+        List<RenderFragment> children = new  List<RenderFragment>();
+        var comp1 = AddChild("ChildComponent");
+        var comp2 = AddChild("secondchild");
+        children.Add(comp1);
+        children.Add(comp2);
+
+        //builder.AddAttribute(2, "Children", children);
+        this.Children = children;
+
+        componentListTest.Add(AddChild("secondchild"));
+        componentListTest.Add(AddChild("secondchild"));
+        builder.AddAttribute(2, "Children", componentListTest);
+
+        builder.CloseComponent();
+    };
+
+    RenderFragment CreateChildComponent() => builder =>
+    {
+        // dynamically create a component
+        var componentType = Type.GetType("jssblazor.Pages.ChildComponent");
+       
+        builder.OpenComponent(0, componentType);
+        builder.CloseComponent();
+    };
+
+    RenderFragment AddChild(string name) => builder =>
+    {
+        // dynamically create a component
+        var componentType = Type.GetType($"jssblazor.Pages.{name}");
+       
+        builder.OpenComponent(0, componentType);
+        builder.CloseComponent();
+    };
+
+    protected void addCompoment()
+    {
+        componentListTest.Add(CreateDynamicComponent(currentCount));
+        componentListTest.Add(AddChild("secondchild"));
+        currentCount++;
+    }
+
+
+    RenderFragment CreateDynamicComponent(int counter) => builder =>
+    {
+        var seq = 0;
+        builder.OpenComponent(seq, typeof(listExample));
+        builder.AddAttribute(++seq, "Text", "text --  "+TxtExample);
+        builder.AddAttribute(++seq, "id","listed-"+counter);
+
+        builder.CloseComponent();
+
+    };
+}
